@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     jwt_secret: str
     jwt_algorithm: str = "HS256"
     jwt_exp_seconds: int = 3600
+    group_encryption_key: str = ""
 
     class Config:
         env_file = ".env"

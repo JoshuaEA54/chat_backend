@@ -11,7 +11,7 @@ GET  /health                 — Healthcheck
 
 from fastapi import APIRouter, HTTPException, Request
 
-from ..models import ChatMessage, ChatUser, JoinRequest, JoinResponse
+from ..models import ChatMessage, ChatUser, JoinRequest, JoinResponse, PublicKeyRequest
 
 router = APIRouter()
 
@@ -114,3 +114,33 @@ def get_dm_history(other_id: str, request: Request) -> list:
         )
 
     return manager.get_dm_history(current_user_id, other_id)
+
+
+@router.put("/api/chat/users/me/public-key", status_code=200)
+def register_public_key(body: PublicKeyRequest, request: Request) -> dict:
+    manager = get_manager(request)
+
+    auth = request.headers.get("Authorization", "")
+    if not auth.startswith("Bearer "):
+        raise HTTPException(
+            status_code=401,
+            detail={"code": "MISSING_OR_INVALID_AUTH",
+                    "message": "Debes enviar Authorization: Bearer <token>."},
+        )
+
+    token = auth.split(" ", 1)[1]
+    user_id = manager.decode_token(token)
+
+    if not user_id or not manager.get_user(user_id):
+        raise HTTPException(
+            status_code=401,
+            detail={"code": "INVALID_TOKEN", "message": "Token inválido o expirado."},
+        )
+
+    if not manager.update_public_key(user_id, body.public_key):
+        raise HTTPException(
+            status_code=404,
+            detail={"code": "USER_NOT_FOUND", "message": "Usuario no encontrado."},
+        )
+
+    return {"status": "ok"}

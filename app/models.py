@@ -4,11 +4,12 @@ from pydantic import BaseModel
 
 
 class ChatUser(BaseModel):
-    
+
     id: str
     nickname: str
     joined_at: str       # ISO 8601
     is_online: bool
+    public_key: Optional[str] = None
 
 
 class ChatMessage(BaseModel):
@@ -34,6 +35,10 @@ class JoinRequest(BaseModel):
 class JoinResponse(BaseModel):
     user: ChatUser
     token: str
+
+
+class PublicKeyRequest(BaseModel):
+    public_key: str
 
 
 # ── Payloads WebSocket (cliente → servidor) ───────────────────────────────────

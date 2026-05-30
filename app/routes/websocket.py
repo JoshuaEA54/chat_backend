@@ -35,6 +35,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from fastapi.websockets import WebSocketState
 
 from ..connection_manager import ConnectionManager
+from ..config import settings
 from ..models import ChatMessage
 
 router = APIRouter()
@@ -79,7 +80,7 @@ async def _handle_message(
             await manager.send_to(user_id, {"type": "error", "message": "El mensaje no puede estar vacío."})
             return
 
-        if len(content) > 1000:
+        if len(content) > 2000:
             await manager.send_to(user_id, {"type": "error", "message": "El mensaje es demasiado largo (máx 1000 caracteres)."})
             return
 
@@ -135,7 +136,7 @@ async def _handle_message(
             await manager.send_to(user_id, {"type": "error", "message": "El mensaje no puede estar vacío."})
             return
 
-        if len(content) > 1000:
+        if len(content) > 2000:
             await manager.send_to(user_id, {"type": "error", "message": "El mensaje es demasiado largo (máx 1000 caracteres)."})
             return
 
@@ -231,6 +232,10 @@ async def websocket_endpoint(websocket: WebSocket, token: str) -> None:
     await manager.send_to(user_id, {
         "type": "group_history",
         "messages": [m.model_dump() for m in manager.get_group_messages(50)],
+    })
+    await manager.send_to(user_id, {
+        "type": "group_key",
+        "key": settings.group_encryption_key,
     })
 
     # Loop principal de recepción de mensajes

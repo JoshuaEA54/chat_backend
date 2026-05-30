@@ -192,6 +192,13 @@ class ConnectionManager:
     def get_user(self, user_id: str) -> Optional[ChatUser]:
         return self.registered_users.get(user_id)
 
+    def update_public_key(self, user_id: str, public_key: str) -> bool:
+        user = self.registered_users.get(user_id)
+        if not user:
+            return False
+        user.public_key = public_key
+        return True
+
     # ── Vistos (read receipts) ────────────────────────────────────────────────
 
     def get_message_by_id(self, message_id: str) -> Optional[ChatMessage]:
