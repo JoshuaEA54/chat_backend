@@ -2,11 +2,8 @@
 Rutas HTTP del chat.
 
 POST /api/chat/join          — Registrar un nickname y obtener token
-<<<<<<< Updated upstream
-=======
 POST /api/chat/logout        — Revocar el token actual
 POST /api/chat/messages      — Guardar mensaje (group o dm)
->>>>>>> Stashed changes
 GET  /api/chat/users         — Usuarios conectados ahora
 GET  /api/chat/messages      — Historial del chat grupal
 GET  /api/chat/messages/dm/{other_id} — Historial de DMs entre dos usuarios
@@ -147,28 +144,6 @@ def get_group_messages(request: Request, limit: int = 50) -> list:
     return manager.get_group_messages(limit)
 
 
-<<<<<<< Updated upstream
-@router.get("/api/chat/messages/dm/{other_id}", response_model=list[ChatMessage])
-def get_dm_history(other_id: str, request: Request) -> list:
-
-    manager = get_manager(request)
-    
-    auth = request.headers.get("Authorization", "")
-    if not auth.startswith("Bearer "):
-        raise HTTPException(
-        status_code=401,
-        detail={
-            "code": "MISSING_OR_INVALID_AUTH",
-            "message": "Debes enviar Authorization: Bearer <token>.",
-            },
-        )
-
-    token = auth.split(" ", 1)[1]
-    
-    current_user_id = manager.decode_token(token)
-
-    if not current_user_id or not manager.get_user(current_user_id):
-=======
 @router.post("/api/chat/messages", response_model=ChatMessage)
 def create_message(body: CreateMessageRequest, request: Request) -> ChatMessage:
     manager = get_manager(request)
@@ -186,7 +161,6 @@ def create_message(body: CreateMessageRequest, request: Request) -> ChatMessage:
         )
 
     if len(content) > 1000:
->>>>>>> Stashed changes
         raise HTTPException(
             status_code=400,
             detail={
