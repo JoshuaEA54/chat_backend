@@ -1,28 +1,16 @@
-<<<<<<< Updated upstream
-
-
 import asyncio
-import base64
-=======
-import asyncio
->>>>>>> Stashed changes
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Optional
+from uuid import uuid4
 
+import jwt
 from fastapi import WebSocket
+from jwt import ExpiredSignatureError, InvalidTokenError
 
 from .config import settings
 from .models import ChatMessage, ChatUser
 from .services.chat_history_service import ChatHistoryStore, InMemoryChatHistoryStore
-
-<<<<<<< Updated upstream
-=======
-# Imports para JWT
-import jwt
-from jwt import ExpiredSignatureError, InvalidTokenError
-from uuid import uuid4
->>>>>>> Stashed changes
 
 
 class ConnectionManager:
@@ -40,22 +28,9 @@ class ConnectionManager:
         # Historial persistente (memoria/Firebase)
         self.history_store: ChatHistoryStore = InMemoryChatHistoryStore()
 
-<<<<<<< Updated upstream
-    # ── Tokens ───────────────────────────────────────────────────────────────
-
-    def create_token(self, user_id: str) -> str:
-        """Codifica user_id en base64 para usarlo como token de sesión."""
-        return base64.urlsafe_b64encode(user_id.encode()).decode()
-
-    def decode_token(self, token: str) -> Optional[str]:
-        """Decodifica el token. Devuelve None si es inválido."""
-        try:
-            return base64.urlsafe_b64decode(token.encode()).decode()
-        except Exception:
-            return None
-=======
         # Tokens revocados: jti → exp (timestamp Unix)
         self.revoked_tokens: dict[str, int] = {}
+
         # Vistos: message_id → lista de {"user_id": ..., "seen_at": ...}
         self.read_receipts: dict[str, list[dict]] = {}
 
@@ -116,7 +91,6 @@ class ConnectionManager:
         self.revoked_tokens[str(jti)] = int(exp)
         self._cleanup_revoked_tokens()
         return True
->>>>>>> Stashed changes
 
     # ── Registro ─────────────────────────────────────────────────────────────
 
@@ -174,8 +148,6 @@ class ConnectionManager:
                 try:
                     await ws.send_json(message)
                 except Exception:
-                    # Si falla el envío, ignoramos — el disconnect se detectará
-                    # en el próximo receive del loop principal
                     pass
 
     async def send_to(self, user_id: str, message: dict) -> None:
@@ -210,8 +182,6 @@ class ConnectionManager:
 
     def get_user(self, user_id: str) -> Optional[ChatUser]:
         return self.registered_users.get(user_id)
-<<<<<<< Updated upstream
-=======
 
     # ── Vistos (read receipts) ────────────────────────────────────────────────
 
@@ -264,4 +234,3 @@ class ConnectionManager:
 
         self.read_receipts.pop(msg.id, None)
         self._expiry_tasks.pop(msg.id, None)
->>>>>>> Stashed changes
